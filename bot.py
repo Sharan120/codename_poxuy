@@ -10,11 +10,13 @@ import ast
 from discord.ext.commands import Bot
 from discord.voice_client import VoiceClient
 from discord.utils import get
+import datetime, time
+TOKEN = 'NjM3MDA5OTEyNTg4OTI3MDE3.Xch75Q.KpvCq1SeCNOQssY3JLuv_nWlA44'
 bot = commands.Bot(command_prefix='!')
 
 bot.remove_command('help')
 
-status = cycle(['Сделано Sharan\'ом', 'В разработке!', 'Сделано на discord.py!', 'GITHUB VERSION'])
+status = cycle(['Сделано Sharan\'ом', 'В разработке!', 'Сделано на discord.py!'])
 @bot.event
 async def on_ready():
     change_status.start()
@@ -85,7 +87,7 @@ async def ping(ctx):
 
     await ctx.send(embed=eembeardd)
 
-@bot.command(aliases=['8ball'])
+@bot.command(name="8ball")
 async def _8ball(ctx, *, question):
     "Магический шар. "
     responses = [
@@ -224,13 +226,14 @@ async def eval_fn(ctx, *, cmd):
 @bot.command()
 async def userinfo(ctx, *, member : discord.Member):
     userembd = discord.Embed(
-        title = f'Информация о @{member}',
-        description = f'Бот?: {"Да" if member.bot else "Нет"}\nАйди: {member.id}\nАктивность: {member.activities}\nВысшая роль: {member.top_role}',
-        colour = discord.Colour.gold()
+        colour = ctx.message.author.top_role.colour
     )
-
+    userembd.add_field(name='Бот?:', value="Да" if member.bot else "Нет", inline=True)
+    userembd.add_field(name='Статус:', value=f'{member.status}', inline=True)
+    userembd.add_field(name='Айди:', value=f'{member.id}', inline=False)
+    userembd.set_thumbnail(url=f'{member.avatar_url}')
+    userembd.set_author(name=f'{member}', icon_url=f'{member.avatar_url}')
     userembd.set_footer(text=f'Зашел на сервер: {member.joined_at}')
-    userembd.set_image(url=member.avatar_url)
 
     await ctx.send(embed=userembd)
 
@@ -241,26 +244,19 @@ async def rename(ctx, *, name):
 @bot.command()
 async def say(ctx, *, arg):
     await ctx.send(arg)
-cmds_desc = ''
-for y in bot.walk_commands():
-    cmds_desc += (f'!{y.name}\n')
-@bot.command()
-async def help(ctx):
-    helpembed = discord.Embed(
-        title = '💡 Помощь!',
-        description = f'{cmds_desc}',
-        colour = discord.Colour.dark_gold()
-    )
-
-    await ctx.send(embed=helpembed)
-
 @bot.command()
 async def info(ctx):
     embridbly = discord.Embed(
         title = 'Информация о боте!',
-        description = f'Общее количество участников: {len(bot.users)}\nВерсия discord.py: {discord.__version__}\nПлатформа на которой запущен бот: {sys.platform}',
-        colour = discord.Colour.gold()
+        colour = discord.Colour.blurple()
     )
+    current_time = time.time()
+    difference = int(round(current_time - start_time))
+    text = str(datetime.timedelta(seconds=difference))
+    embridbly.add_field(name="Аптайм:", value=text, inline=False)
+    embridbly.add_field(name='Общее количество участников:', value=f'{len(bot.users)}', inline=False)
+    embridbly.add_field(name='Версия discord.py:', value=f'{discord.__version__}', inline=False)
+    embridbly.add_field(name='Платформа на которой запущен бот:', value=f'{sys.platform}', inline=False)
 
     await ctx.send(embed=embridbly)
 
@@ -286,7 +282,10 @@ async def serverinfo(ctx):
         value = f'{len(guilddos.roles)}',
         inline=False
     )
-    
+    serverembed.add_field(
+        name = f'Количество каналов:',
+        value = f'{len(guilddos.channels)} (категории тоже считает кстати)'
+    )
     serverembed.add_field(
         name = f'Создатель сервера:',
         value = f'{guilddos.owner}',
@@ -296,4 +295,15 @@ async def serverinfo(ctx):
         text = f'Сервер создан: {guilddos.created_at}'
     )
     await ctx.send(embed=serverembed)
-bot.run('твой токен')
+start_time = time.time()
+@bot.command()
+async def help(ctx):
+    cmds_desc = ''
+    for y in bot.walk_commands():
+        cmds_desc += (f'!{y.name}\n')
+    helpembed = discord.Embed(
+        title = '💡 Помощь!',
+        colour = discord.Colour.dark_gold()
+    )
+    await ctx.send(embed=helpembed)
+bot.run('NjM3MDA5OTEyNTg4OTI3MDE3.Xch75Q.KpvCq1SeCNOQssY3JLuv_nWlA44')
